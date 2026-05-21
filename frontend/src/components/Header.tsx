@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { LogOut } from "lucide-react";
+import { LogOut, ShieldCheck } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/auth.store";
 
@@ -26,25 +26,35 @@ export default function Header() {
     : "U";
 
   return (
-    <header className="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-6">
-      <div className="lg:hidden flex items-center gap-2">
-        <div className="text-sm font-bold text-slate-900">VShield</div>
-      </div>
-      <div />
-
-      <div className="flex items-center gap-4">
-        <div className="hidden sm:block text-right">
-          <div className="text-sm font-medium text-slate-900">
-            {user?.name ?? "—"}
-          </div>
-          <div className="text-xs text-slate-500">{user?.email ?? ""}</div>
+    <header className="relative flex h-16 items-center justify-between border-b border-white/[0.06] bg-matter/40 px-4 backdrop-blur-xl sm:px-6">
+      {/* Mobile brand */}
+      <div className="flex items-center gap-2 lg:hidden">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#EA580C] to-[#F7931A] text-white">
+          <ShieldCheck size={16} strokeWidth={2.5} />
         </div>
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-600 text-xs font-bold text-white">
-          {initials}
+        <span className="font-heading text-sm font-bold">VShield</span>
+      </div>
+      <div className="hidden lg:flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-stardust">
+        <span className="live-dot" />
+        <span>Mainnet · India</span>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <div className="hidden text-right sm:block">
+          <div className="text-sm font-medium text-white">{user?.name ?? "—"}</div>
+          <div className="font-mono text-[10px] uppercase tracking-wider text-stardust">
+            {user?.email ?? ""}
+          </div>
+        </div>
+        <div className="relative">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#EA580C] to-[#F7931A] font-mono text-xs font-bold text-white ring-2 ring-white/10">
+            {initials}
+          </div>
+          <span className="absolute -inset-1 rounded-full bg-[#F7931A] opacity-25 blur-sm -z-10" />
         </div>
         <button
           onClick={handleLogout}
-          className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50"
+          className="btn-ghost"
           title="Sign out"
         >
           <LogOut size={14} />

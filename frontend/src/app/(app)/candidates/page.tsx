@@ -37,7 +37,6 @@ export default function CandidatesPage() {
   const [data, setData] = useState<PaginatedResult<Candidate> | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // debounce search input
   useEffect(() => {
     const t = setTimeout(() => {
       setSearch(searchInput.trim());
@@ -46,7 +45,6 @@ export default function CandidatesPage() {
     return () => clearTimeout(t);
   }, [searchInput]);
 
-  // re-fetch on page/search/status change
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
@@ -80,21 +78,25 @@ export default function CandidatesPage() {
   }, [pagination]);
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="mx-auto max-w-7xl space-y-6">
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Candidates</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Manage candidates and run identity verifications
+          <div className="eyebrow">CANDIDATES</div>
+          <h1 className="mt-3 font-heading text-3xl font-bold text-white sm:text-4xl">
+            Manage <span className="text-gradient">candidates</span>
+          </h1>
+          <p className="mt-2 text-sm text-stardust">
+            Search, filter, and run identity checks on your candidates.
           </p>
         </div>
         <div className="flex gap-2">
           <Link href="/candidates/bulk" className="btn-secondary">
-            <Upload size={16} className="mr-1.5" />
+            <Upload size={16} />
             Bulk upload
           </Link>
           <Link href="/candidates/new" className="btn-primary">
-            <Plus size={16} className="mr-1.5" />
+            <Plus size={16} />
             New candidate
           </Link>
         </div>
@@ -105,12 +107,12 @@ export default function CandidatesPage() {
         <div className="relative flex-1">
           <Search
             size={16}
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-stardust"
           />
           <input
             type="text"
             placeholder="Search by name, email, or phone"
-            className="input pl-9"
+            className="input pl-10"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
           />
@@ -118,10 +120,10 @@ export default function CandidatesPage() {
         <div className="relative">
           <Filter
             size={14}
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-stardust"
           />
           <select
-            className="input pl-9 pr-8 appearance-none cursor-pointer"
+            className="input cursor-pointer pl-10 pr-8 appearance-none min-w-[180px]"
             value={status}
             onChange={(e) => {
               setStatus(e.target.value as CandidateStatus | "");
@@ -129,7 +131,7 @@ export default function CandidatesPage() {
             }}
           >
             {STATUSES.map((s) => (
-              <option key={s.value} value={s.value}>
+              <option key={s.value} value={s.value} className="bg-matter text-white">
                 {s.label}
               </option>
             ))}
@@ -140,28 +142,28 @@ export default function CandidatesPage() {
       {/* Table */}
       <div className="card overflow-hidden">
         {loading ? (
-          <div className="p-6 space-y-3">
+          <div className="space-y-3 p-6">
             {Array.from({ length: 6 }).map((_, i) => (
               <div
                 key={i}
-                className="h-12 w-full animate-pulse rounded bg-slate-100"
+                className="h-12 w-full animate-pulse rounded bg-white/[0.03]"
               />
             ))}
           </div>
         ) : items.length === 0 ? (
           <div className="px-6 py-16 text-center">
-            <Users className="mx-auto h-10 w-10 text-slate-300" />
-            <p className="mt-3 text-sm font-medium text-slate-900">
+            <Users className="mx-auto h-10 w-10 text-stardust/40" />
+            <p className="mt-3 font-heading text-sm font-medium text-white">
               {search || status ? "No matching candidates" : "No candidates yet"}
             </p>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-stardust">
               {search || status
                 ? "Try clearing your filters."
                 : "Add your first candidate to begin."}
             </p>
             {!search && !status && (
-              <Link href="/candidates/new" className="btn-primary mt-4">
-                <Plus size={16} className="mr-1.5" />
+              <Link href="/candidates/new" className="btn-primary mt-5">
+                <Plus size={16} />
                 New candidate
               </Link>
             )}
@@ -169,8 +171,8 @@ export default function CandidatesPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                <tr>
+              <thead className="border-b border-white/[0.05] bg-white/[0.02]">
+                <tr className="text-left font-mono text-[10px] uppercase tracking-[0.18em] text-stardust">
                   <th className="px-6 py-3">Candidate</th>
                   <th className="px-6 py-3">Aadhaar</th>
                   <th className="px-6 py-3">PAN</th>
@@ -178,29 +180,29 @@ export default function CandidatesPage() {
                   <th className="px-6 py-3">Created</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200">
+              <tbody className="divide-y divide-white/[0.04]">
                 {items.map((c) => (
                   <tr
                     key={c.id}
-                    className="cursor-pointer transition hover:bg-slate-50"
+                    className="cursor-pointer transition hover:bg-white/[0.025]"
                     onClick={() => router.push(`/candidates/${c.id}`)}
                   >
                     <td className="px-6 py-4">
-                      <div className="font-medium text-slate-900">
-                        {c.fullName}
+                      <div className="font-medium text-white">{c.fullName}</div>
+                      <div className="mt-0.5 font-mono text-[11px] text-stardust">
+                        {c.email}
                       </div>
-                      <div className="text-xs text-slate-500">{c.email}</div>
                     </td>
-                    <td className="px-6 py-4 text-slate-700 font-mono text-xs">
+                    <td className="px-6 py-4 font-mono text-[12px] text-stardust">
                       {c.aadhaarMasked}
                     </td>
-                    <td className="px-6 py-4 text-slate-700 font-mono text-xs">
+                    <td className="px-6 py-4 font-mono text-[12px] text-stardust">
                       {c.panMasked}
                     </td>
                     <td className="px-6 py-4">
-                      <StatusBadge status={c.status} />
+                      <StatusBadge status={c.status} size="sm" />
                     </td>
-                    <td className="px-6 py-4 text-slate-500 text-xs">
+                    <td className="px-6 py-4 font-mono text-[11px] text-stardust">
                       {new Date(c.createdAt).toLocaleDateString("en-IN", {
                         day: "2-digit",
                         month: "short",
@@ -214,30 +216,28 @@ export default function CandidatesPage() {
           </div>
         )}
 
-        {/* Pagination */}
         {pagination && pagination.total > 0 && (
-          <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-6 py-3">
-            <div className="text-xs text-slate-500">
-              Showing {showingRange}
+          <div className="flex items-center justify-between border-t border-white/[0.05] bg-white/[0.02] px-6 py-3">
+            <div className="font-mono text-[11px] uppercase tracking-wider text-stardust">
+              {showingRange}
             </div>
             <div className="flex items-center gap-2">
               <button
-                className="btn-secondary !py-1.5 !px-2"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-white/10 bg-white/[0.03] text-stardust transition hover:border-white/20 hover:text-white disabled:opacity-40"
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={pagination.page <= 1}
               >
-                <ChevronLeft size={16} />
+                <ChevronLeft size={14} />
               </button>
-              <div className="text-xs text-slate-600">
-                Page <span className="font-semibold">{pagination.page}</span> of{" "}
-                {pagination.totalPages}
+              <div className="font-mono text-[11px] text-stardust">
+                <span className="text-white">{pagination.page}</span> / {pagination.totalPages}
               </div>
               <button
-                className="btn-secondary !py-1.5 !px-2"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-white/10 bg-white/[0.03] text-stardust transition hover:border-white/20 hover:text-white disabled:opacity-40"
                 onClick={() => setPage((p) => p + 1)}
                 disabled={pagination.page >= pagination.totalPages}
               >
-                <ChevronRight size={16} />
+                <ChevronRight size={14} />
               </button>
             </div>
           </div>

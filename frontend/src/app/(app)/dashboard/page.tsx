@@ -13,6 +13,7 @@ import {
   TrendingUp,
   PieChart as PieChartIcon,
   BarChart3,
+  Activity,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { candidateApi } from "@/lib/services/candidate.api";
@@ -31,24 +32,43 @@ interface StatCardProps {
   label: string;
   value: number;
   icon: React.ReactNode;
-  accent: string;
+  glowColor: string; // rgba string for shadow
+  iconBg: string; // background classes for icon container
+  iconColor: string; // icon stroke color class
   trendLabel?: string;
 }
 
-function StatCard({ label, value, icon, accent, trendLabel }: StatCardProps) {
+function StatCard({
+  label,
+  value,
+  icon,
+  glowColor,
+  iconBg,
+  iconColor,
+  trendLabel,
+}: StatCardProps) {
   return (
-    <div className="card relative overflow-hidden p-5">
-      <div className="flex items-start justify-between">
+    <div
+      className="card card-hover relative overflow-hidden p-5"
+      style={{ boxShadow: `inset 0 0 0 1px rgba(255,255,255,0.04), 0 0 30px -15px ${glowColor}` }}
+    >
+      {/* Decorative corner accent */}
+      <div className="pointer-events-none absolute -top-12 -right-12 h-32 w-32 rounded-full opacity-30 blur-2xl"
+           style={{ background: glowColor }} />
+
+      <div className="relative flex items-start justify-between">
         <div>
-          <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
-            {label}
+          <div className="eyebrow">{label}</div>
+          <div className="mt-3 font-heading text-4xl font-bold text-white">
+            {value.toLocaleString()}
           </div>
-          <div className="mt-2 text-3xl font-bold text-slate-900">{value}</div>
           {trendLabel && (
-            <div className="mt-1 text-[11px] text-slate-400">{trendLabel}</div>
+            <div className="mt-1.5 font-mono text-[10px] uppercase tracking-wider text-stardust">
+              {trendLabel}
+            </div>
           )}
         </div>
-        <div className={`flex h-11 w-11 items-center justify-center rounded-lg ${accent}`}>
+        <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${iconBg} ring-1 ring-inset ${iconColor}`}>
           {icon}
         </div>
       </div>
@@ -59,8 +79,8 @@ function StatCard({ label, value, icon, accent, trendLabel }: StatCardProps) {
 function SkeletonCard() {
   return (
     <div className="card p-5">
-      <div className="h-3 w-20 animate-pulse rounded bg-slate-200" />
-      <div className="mt-3 h-8 w-16 animate-pulse rounded bg-slate-200" />
+      <div className="h-3 w-20 animate-pulse rounded bg-white/[0.04]" />
+      <div className="mt-3 h-8 w-16 animate-pulse rounded bg-white/[0.04]" />
     </div>
   );
 }
@@ -78,14 +98,18 @@ function ChartCard({
 }) {
   return (
     <div className="card">
-      <div className="flex items-start justify-between border-b border-slate-200 px-6 py-4">
+      <div className="flex items-start justify-between border-b border-white/[0.06] px-6 py-4">
         <div>
-          <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-            <span className="text-slate-400">{icon}</span>
-            {title}
+          <div className="flex items-center gap-2.5">
+            <span className="text-[#F7931A]">{icon}</span>
+            <span className="font-heading text-sm font-semibold text-white">
+              {title}
+            </span>
           </div>
           {subtitle && (
-            <div className="mt-0.5 text-xs text-slate-500">{subtitle}</div>
+            <div className="mt-1 font-mono text-[10px] uppercase tracking-wider text-stardust">
+              {subtitle}
+            </div>
           )}
         </div>
       </div>
@@ -126,8 +150,6 @@ export default function DashboardPage() {
   }, []);
 
   const last7Total = analytics?.timeseries.reduce((sum, t) => sum + t.count, 0) ?? 0;
-  // Latest verification per (candidate, type). Aadhaar + PAN each top out
-  // at total-candidates count when every candidate has been checked.
   const candidatesChecked =
     analytics?.verificationBreakdown.reduce(
       (sum, r) => sum + r.verified + r.failed,
@@ -145,21 +167,29 @@ export default function DashboardPage() {
   })();
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="mx-auto max-w-7xl space-y-8">
+      {/* Page header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Overview of your verification activity
+          <div className="eyebrow">
+            <span className="live-dot" />
+            DASHBOARD
+          </div>
+          <h1 className="mt-3 font-heading text-3xl font-bold text-white sm:text-4xl">
+            Verification <span className="text-gradient">overview</span>
+          </h1>
+          <p className="mt-2 max-w-xl text-sm text-stardust">
+            Track candidate verifications, monitor identity check throughput,
+            and download audit-grade reports.
           </p>
         </div>
         <Link href="/candidates/new" className="btn-primary">
-          <Plus size={16} className="mr-1.5" />
+          <Plus size={16} />
           New candidate
         </Link>
       </div>
 
-      {/* Top stat cards (5) */}
+      {/* Stat cards */}
       {loading ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {Array.from({ length: 5 }).map((_, i) => (
@@ -171,48 +201,58 @@ export default function DashboardPage() {
           <StatCard
             label="Total"
             value={stats?.total ?? 0}
-            icon={<Users className="h-5 w-5 text-slate-700" />}
-            accent="bg-slate-100"
+            icon={<Users className="h-5 w-5 text-white" />}
+            glowColor="rgba(247,147,26,0.4)"
+            iconBg="bg-gradient-to-br from-[#EA580C] to-[#F7931A]"
+            iconColor="ring-[#F7931A]/40"
             trendLabel={`${last7Total} added this week`}
           />
           <StatCard
             label="Verified"
             value={stats?.verified ?? 0}
-            icon={<CheckCircle2 className="h-5 w-5 text-green-700" />}
-            accent="bg-green-100"
+            icon={<CheckCircle2 className="h-5 w-5 text-emerald-300" />}
+            glowColor="rgba(16,185,129,0.35)"
+            iconBg="bg-emerald-500/15"
+            iconColor="ring-emerald-400/30"
             trendLabel={`${successRate}% verification success`}
           />
           <StatCard
             label="Pending"
             value={stats?.pending ?? 0}
-            icon={<Clock className="h-5 w-5 text-indigo-700" />}
-            accent="bg-indigo-100"
+            icon={<Clock className="h-5 w-5 text-[#F7931A]" />}
+            glowColor="rgba(247,147,26,0.3)"
+            iconBg="bg-[#F7931A]/10"
+            iconColor="ring-[#F7931A]/30"
           />
           <StatCard
             label="Partial"
             value={stats?.partial ?? 0}
-            icon={<ShieldQuestion className="h-5 w-5 text-yellow-700" />}
-            accent="bg-yellow-100"
+            icon={<ShieldQuestion className="h-5 w-5 text-[#FFD600]" />}
+            glowColor="rgba(255,214,0,0.3)"
+            iconBg="bg-[#FFD600]/10"
+            iconColor="ring-[#FFD600]/30"
           />
           <StatCard
             label="Failed"
             value={stats?.failed ?? 0}
-            icon={<AlertTriangle className="h-5 w-5 text-red-700" />}
-            accent="bg-red-100"
+            icon={<AlertTriangle className="h-5 w-5 text-red-300" />}
+            glowColor="rgba(239,68,68,0.3)"
+            iconBg="bg-red-500/15"
+            iconColor="ring-red-400/30"
           />
         </div>
       )}
 
-      {/* Charts row */}
+      {/* Charts row 1 */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <ChartCard
-            title="Candidates added — last 7 days"
-            subtitle={`${last7Total} total in this period`}
+            title="Candidate activity"
+            subtitle={`${last7Total} added in the last 7 days`}
             icon={<TrendingUp size={16} />}
           >
             {loading || !analytics ? (
-              <div className="h-64 animate-pulse rounded bg-slate-100" />
+              <div className="h-64 animate-pulse rounded bg-white/[0.03]" />
             ) : (
               <DailyActivityChart data={analytics.timeseries} />
             )}
@@ -224,22 +264,22 @@ export default function DashboardPage() {
           icon={<PieChartIcon size={16} />}
         >
           {loading || !stats ? (
-            <div className="h-64 animate-pulse rounded bg-slate-100" />
+            <div className="h-64 animate-pulse rounded bg-white/[0.03]" />
           ) : (
             <StatusDonut stats={stats} />
           )}
         </ChartCard>
       </div>
 
-      {/* Verification breakdown + Recent candidates */}
+      {/* Charts row 2 + recent candidates */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <ChartCard
           title="Verification checks"
-          subtitle="Current status per candidate (latest run)"
+          subtitle="Current state per candidate"
           icon={<BarChart3 size={16} />}
         >
           {loading || !analytics ? (
-            <div className="h-64 animate-pulse rounded bg-slate-100" />
+            <div className="h-64 animate-pulse rounded bg-white/[0.03]" />
           ) : (
             <VerificationBreakdownChart data={analytics.verificationBreakdown} />
           )}
@@ -247,65 +287,66 @@ export default function DashboardPage() {
 
         <div className="lg:col-span-2">
           <div className="card">
-            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
-              <h2 className="text-sm font-semibold text-slate-900">
-                Recent candidates
-              </h2>
+            <div className="flex items-center justify-between border-b border-white/[0.06] px-6 py-4">
+              <div className="flex items-center gap-2.5">
+                <Activity size={16} className="text-[#F7931A]" />
+                <h2 className="font-heading text-sm font-semibold text-white">
+                  Recent candidates
+                </h2>
+              </div>
               <Link
                 href="/candidates"
-                className="inline-flex items-center gap-1 text-xs font-medium text-brand-600 hover:text-brand-700"
+                className="inline-flex items-center gap-1 font-mono text-[11px] uppercase tracking-wider text-[#F7931A] transition hover:text-[#FFD600]"
               >
                 View all <ArrowRight size={12} />
               </Link>
             </div>
 
             {loading ? (
-              <div className="p-6 space-y-3">
+              <div className="space-y-3 p-6">
                 {Array.from({ length: 3 }).map((_, i) => (
                   <div
                     key={i}
-                    className="h-12 w-full animate-pulse rounded bg-slate-100"
+                    className="h-12 w-full animate-pulse rounded bg-white/[0.03]"
                   />
                 ))}
               </div>
             ) : recent.length === 0 ? (
               <div className="px-6 py-16 text-center">
-                <Users className="mx-auto h-10 w-10 text-slate-300" />
-                <p className="mt-3 text-sm font-medium text-slate-900">
+                <Users className="mx-auto h-10 w-10 text-stardust/40" />
+                <p className="mt-3 font-heading text-sm font-medium text-white">
                   No candidates yet
                 </p>
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 text-sm text-stardust">
                   Add your first candidate to start running verifications.
                 </p>
-                <Link href="/candidates/new" className="btn-primary mt-4">
-                  <Plus size={16} className="mr-1.5" />
+                <Link href="/candidates/new" className="btn-primary mt-5">
+                  <Plus size={16} />
                   New candidate
                 </Link>
               </div>
             ) : (
-              <ul className="divide-y divide-slate-200">
+              <ul className="divide-y divide-white/[0.05]">
                 {recent.map((c) => (
                   <li key={c.id}>
                     <Link
                       href={`/candidates/${c.id}`}
-                      className="flex items-center justify-between px-6 py-4 transition hover:bg-slate-50"
+                      className="flex items-center justify-between px-6 py-4 transition hover:bg-white/[0.02]"
                     >
                       <div>
-                        <div className="text-sm font-medium text-slate-900">
-                          {c.fullName}
-                        </div>
-                        <div className="text-xs text-slate-500">
-                          {c.email} • {c.phone}
+                        <div className="font-medium text-white">{c.fullName}</div>
+                        <div className="mt-0.5 font-mono text-[11px] text-stardust">
+                          {c.email} · {c.phone}
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
-                        <span className="hidden text-xs text-slate-500 sm:inline">
+                        <span className="hidden font-mono text-[10px] uppercase tracking-wider text-stardust sm:inline">
                           {new Date(c.createdAt).toLocaleDateString("en-IN", {
                             day: "2-digit",
                             month: "short",
                           })}
                         </span>
-                        <StatusBadge status={c.status} />
+                        <StatusBadge status={c.status} size="sm" />
                       </div>
                     </Link>
                   </li>

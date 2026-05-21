@@ -141,22 +141,25 @@ export default function BulkUploadPage() {
     <div className="mx-auto max-w-5xl space-y-6">
       <Link
         href="/candidates"
-        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900"
+        className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wider text-stardust transition hover:text-white"
       >
         <ArrowLeft size={14} />
         Back to candidates
       </Link>
 
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Bulk upload</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <div className="eyebrow">BULK UPLOAD</div>
+          <h1 className="mt-3 font-heading text-3xl font-bold text-white sm:text-4xl">
+            Onboard <span className="text-gradient">in bulk</span>
+          </h1>
+          <p className="mt-2 max-w-xl text-sm text-stardust">
             Upload a CSV of candidates. Each row is validated and inserted
             independently — bad rows don&apos;t block good ones.
           </p>
         </div>
         <button onClick={downloadTemplate} className="btn-secondary">
-          <Download size={16} className="mr-1.5" />
+          <Download size={16} />
           Sample template
         </button>
       </div>
@@ -167,15 +170,21 @@ export default function BulkUploadPage() {
           onClick={onPickClick}
           onDrop={onDrop}
           onDragOver={(e) => e.preventDefault()}
-          className="card flex cursor-pointer flex-col items-center justify-center border-2 border-dashed border-slate-300 bg-white px-6 py-16 text-center transition hover:border-brand-500 hover:bg-brand-50/50"
+          className="card relative cursor-pointer overflow-hidden border-2 border-dashed border-white/15 px-6 py-20 text-center transition hover:border-[#F7931A]/60 hover:bg-[#F7931A]/[0.03]"
         >
-          <Upload className="h-10 w-10 text-slate-400" />
-          <p className="mt-3 text-sm font-medium text-slate-900">
-            Drop your CSV here, or click to browse
-          </p>
-          <p className="mt-1 text-xs text-slate-500">
-            Required headers: {REQUIRED_HEADERS.join(", ")}
-          </p>
+          <div className="pointer-events-none absolute inset-0 bg-dots-pattern opacity-50" />
+          <div className="pointer-events-none absolute -top-20 left-1/2 h-40 w-40 -translate-x-1/2 rounded-full bg-[#F7931A] opacity-10 blur-3xl" />
+          <div className="relative">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#EA580C]/30 to-[#F7931A]/15 ring-1 ring-[#F7931A]/30">
+              <Upload className="h-6 w-6 text-[#F7931A]" />
+            </div>
+            <p className="mt-4 font-heading text-base font-semibold text-white">
+              Drop your CSV here, or click to browse
+            </p>
+            <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.15em] text-stardust">
+              Required: {REQUIRED_HEADERS.join(" · ")}
+            </p>
+          </div>
           <input
             ref={inputRef}
             type="file"
@@ -191,26 +200,26 @@ export default function BulkUploadPage() {
 
       {/* File picked, preview */}
       {fileName && !result && (
-        <div className="card">
-          <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+        <div className="card overflow-hidden">
+          <div className="flex items-center justify-between border-b border-white/[0.06] px-6 py-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-md bg-brand-50 text-brand-700">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#F7931A]/15 text-[#F7931A] ring-1 ring-[#F7931A]/30">
                 <FileSpreadsheet size={18} />
               </div>
               <div>
-                <div className="text-sm font-semibold text-slate-900">
+                <div className="font-heading text-sm font-semibold text-white">
                   {fileName}
                 </div>
-                <div className="text-xs text-slate-500">
+                <div className="font-mono text-[11px] uppercase tracking-wider text-stardust">
                   {rows.length > 0
-                    ? `${rows.length} valid row(s) parsed`
-                    : "No valid rows"}
+                    ? `${rows.length} VALID ROW(S) PARSED`
+                    : "NO VALID ROWS"}
                 </div>
               </div>
             </div>
             <button
               onClick={reset}
-              className="rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+              className="rounded-md p-1.5 text-stardust transition hover:bg-white/5 hover:text-white"
               title="Remove file"
             >
               <X size={16} />
@@ -218,11 +227,11 @@ export default function BulkUploadPage() {
           </div>
 
           {parseErrors.length > 0 && (
-            <div className="border-b border-red-200 bg-red-50 px-6 py-4">
+            <div className="border-b border-red-500/20 bg-red-500/[0.06] px-6 py-4">
               {parseErrors.map((e, i) => (
                 <div
                   key={i}
-                  className="flex items-start gap-2 text-sm text-red-700"
+                  className="flex items-start gap-2 text-sm text-red-300"
                 >
                   <AlertCircle size={16} className="mt-0.5 shrink-0" />
                   {e}
@@ -235,24 +244,26 @@ export default function BulkUploadPage() {
             <>
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
-                  <thead className="bg-slate-50 text-left font-semibold uppercase tracking-wide text-slate-500">
-                    <tr>
-                      <th className="px-4 py-2">#</th>
+                  <thead className="border-b border-white/[0.05] bg-white/[0.02]">
+                    <tr className="text-left font-mono text-[10px] uppercase tracking-[0.15em] text-stardust">
+                      <th className="px-4 py-2.5">#</th>
                       {REQUIRED_HEADERS.map((h) => (
-                        <th key={h} className="px-4 py-2">
+                        <th key={h} className="px-4 py-2.5">
                           {h}
                         </th>
                       ))}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-200">
+                  <tbody className="divide-y divide-white/[0.04]">
                     {rows.slice(0, 10).map((r, i) => (
-                      <tr key={i}>
-                        <td className="px-4 py-2 text-slate-400">{i + 1}</td>
+                      <tr key={i} className="text-white">
+                        <td className="px-4 py-2 font-mono text-stardust">
+                          {i + 1}
+                        </td>
                         {REQUIRED_HEADERS.map((h) => (
-                          <td key={h} className="px-4 py-2 text-slate-700">
+                          <td key={h} className="px-4 py-2 text-stardust">
                             {r[h] || (
-                              <span className="text-slate-300">—</span>
+                              <span className="text-white/20">—</span>
                             )}
                           </td>
                         ))}
@@ -261,13 +272,13 @@ export default function BulkUploadPage() {
                   </tbody>
                 </table>
                 {rows.length > 10 && (
-                  <div className="border-t border-slate-200 bg-slate-50 px-4 py-2 text-center text-xs text-slate-500">
-                    Showing first 10 of {rows.length} rows
+                  <div className="border-t border-white/[0.05] bg-white/[0.02] px-4 py-2 text-center font-mono text-[10px] uppercase tracking-wider text-stardust">
+                    SHOWING FIRST 10 OF {rows.length} ROWS
                   </div>
                 )}
               </div>
 
-              <div className="flex items-center justify-end gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4">
+              <div className="flex items-center justify-end gap-3 border-t border-white/[0.06] bg-white/[0.02] px-6 py-4">
                 <button onClick={reset} className="btn-secondary">
                   Cancel
                 </button>
@@ -278,12 +289,12 @@ export default function BulkUploadPage() {
                 >
                   {uploading ? (
                     <>
-                      <Loader2 size={16} className="mr-1.5 animate-spin" />
-                      Uploading...
+                      <Loader2 size={16} className="animate-spin" />
+                      Uploading
                     </>
                   ) : (
                     <>
-                      <Upload size={16} className="mr-1.5" />
+                      <Upload size={16} />
                       Upload {rows.length} candidate(s)
                     </>
                   )}
@@ -299,26 +310,20 @@ export default function BulkUploadPage() {
         <div className="space-y-4">
           <div className="grid grid-cols-3 gap-4">
             <div className="card p-5">
-              <div className="text-xs uppercase tracking-wide text-slate-500">
-                Total rows
-              </div>
-              <div className="mt-1 text-2xl font-bold text-slate-900">
+              <div className="eyebrow !text-stardust">TOTAL ROWS</div>
+              <div className="mt-2 font-heading text-3xl font-bold text-white">
                 {result.totalRows}
               </div>
             </div>
             <div className="card p-5">
-              <div className="text-xs uppercase tracking-wide text-green-700">
-                Created
-              </div>
-              <div className="mt-1 text-2xl font-bold text-green-700">
+              <div className="eyebrow !text-emerald-400">CREATED</div>
+              <div className="mt-2 font-heading text-3xl font-bold text-emerald-300">
                 {result.createdCount}
               </div>
             </div>
             <div className="card p-5">
-              <div className="text-xs uppercase tracking-wide text-red-700">
-                Failed
-              </div>
-              <div className="mt-1 text-2xl font-bold text-red-700">
+              <div className="eyebrow !text-red-400">FAILED</div>
+              <div className="mt-2 font-heading text-3xl font-bold text-red-300">
                 {result.failedCount}
               </div>
             </div>
@@ -326,10 +331,10 @@ export default function BulkUploadPage() {
 
           {result.failed.length > 0 && (
             <div className="card">
-              <div className="border-b border-slate-200 px-6 py-3 text-sm font-semibold text-slate-900">
-                Failed rows
+              <div className="border-b border-white/[0.06] px-6 py-3">
+                <div className="eyebrow !text-red-400">FAILED ROWS</div>
               </div>
-              <ul className="divide-y divide-slate-200">
+              <ul className="divide-y divide-white/[0.05]">
                 {result.failed.map((f) => (
                   <li
                     key={f.row}
@@ -337,16 +342,16 @@ export default function BulkUploadPage() {
                   >
                     <AlertCircle
                       size={16}
-                      className="mt-0.5 shrink-0 text-red-600"
+                      className="mt-0.5 shrink-0 text-red-400"
                     />
                     <div>
-                      <div className="font-medium text-slate-900">
+                      <div className="font-heading font-medium text-white">
                         Row {f.row}
                       </div>
-                      <ul className="mt-0.5 list-disc pl-4 text-xs text-red-700">
+                      <ul className="mt-1 list-disc pl-4 text-xs text-red-300">
                         {f.errors.map((e, i) => (
                           <li key={i}>
-                            <span className="font-mono">{e.path}</span>:{" "}
+                            <span className="font-mono text-red-200">{e.path}</span>:{" "}
                             {e.message}
                           </li>
                         ))}
@@ -360,10 +365,10 @@ export default function BulkUploadPage() {
 
           {result.createdCount > 0 && (
             <div className="card">
-              <div className="border-b border-slate-200 px-6 py-3 text-sm font-semibold text-slate-900">
-                Created candidates
+              <div className="border-b border-white/[0.06] px-6 py-3">
+                <div className="eyebrow !text-emerald-400">CREATED CANDIDATES</div>
               </div>
-              <ul className="divide-y divide-slate-200">
+              <ul className="divide-y divide-white/[0.05]">
                 {result.created.map((c) => (
                   <li
                     key={c.id}
@@ -371,13 +376,13 @@ export default function BulkUploadPage() {
                   >
                     <CheckCircle2
                       size={16}
-                      className="shrink-0 text-green-600"
+                      className="shrink-0 text-emerald-400"
                     />
                     <Link
                       href={`/candidates/${c.id}`}
-                      className="text-slate-900 hover:text-brand-700"
+                      className="text-white transition hover:text-[#F7931A]"
                     >
-                      Row {c.row}: {c.fullName}
+                      <span className="font-mono text-stardust mr-2">Row {c.row}:</span>{c.fullName}
                     </Link>
                   </li>
                 ))}

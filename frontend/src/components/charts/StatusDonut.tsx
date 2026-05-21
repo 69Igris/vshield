@@ -14,11 +14,12 @@ interface Props {
   stats: CandidateStats;
 }
 
+// Tuned for the dark void background — bright, glowing slices.
 const COLORS = {
-  Verified: "#16a34a",
-  Pending: "#4f46e5",
-  Partial: "#ca8a04",
-  Failed: "#dc2626",
+  Verified: "#22C55E", // emerald
+  Pending: "#F7931A", // bitcoin orange
+  Partial: "#FFD600", // digital gold
+  Failed: "#EF4444", // red
 };
 
 export default function StatusDonut({ stats }: Props) {
@@ -31,7 +32,7 @@ export default function StatusDonut({ stats }: Props) {
 
   if (stats.total === 0) {
     return (
-      <div className="flex h-64 items-center justify-center text-sm text-slate-400">
+      <div className="flex h-64 items-center justify-center font-mono text-xs uppercase tracking-widest text-stardust/60">
         No data yet
       </div>
     );
@@ -47,25 +48,25 @@ export default function StatusDonut({ stats }: Props) {
             cy="50%"
             innerRadius={55}
             outerRadius={85}
-            paddingAngle={2}
+            paddingAngle={3}
             dataKey="value"
+            stroke="none"
           >
             {data.map((entry) => (
               <Cell
                 key={entry.name}
                 fill={COLORS[entry.name as keyof typeof COLORS]}
-                stroke="white"
-                strokeWidth={2}
               />
             ))}
           </Pie>
           <Tooltip
             contentStyle={{
-              backgroundColor: "#0f172a",
-              border: "none",
-              borderRadius: 6,
+              backgroundColor: "#0F1115",
+              border: "1px solid rgba(255,255,255,0.08)",
+              borderRadius: 10,
               fontSize: 12,
               color: "white",
+              fontFamily: "var(--font-mono)",
             }}
             itemStyle={{ color: "white" }}
             formatter={(v: number, n: string) => [`${v} candidates`, n]}
@@ -74,7 +75,13 @@ export default function StatusDonut({ stats }: Props) {
             verticalAlign="bottom"
             iconType="circle"
             iconSize={8}
-            wrapperStyle={{ fontSize: 12 }}
+            wrapperStyle={{
+              fontSize: 11,
+              color: "#94A3B8",
+              fontFamily: "var(--font-mono)",
+              textTransform: "uppercase",
+              letterSpacing: "0.1em",
+            }}
           />
         </PieChart>
       </ResponsiveContainer>

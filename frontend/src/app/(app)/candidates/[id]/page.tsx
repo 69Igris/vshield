@@ -74,8 +74,6 @@ export default function CandidateDetailPage() {
     try {
       await candidateApi.downloadReport(id);
       toast.success("Report downloaded");
-      // Cloud upload happens in the background — refresh after a beat to
-      // pick up the new reportUrl.
       setTimeout(load, 2500);
     } catch (err) {
       toast.error(getErrorMessage(err));
@@ -97,12 +95,7 @@ export default function CandidateDetailPage() {
   };
 
   const handleDelete = async () => {
-    if (
-      !window.confirm(
-        "Delete this candidate? This will also delete all verification logs."
-      )
-    )
-      return;
+    if (!window.confirm("Delete this candidate? This will also delete all verification logs.")) return;
     setDeleting(true);
     try {
       await candidateApi.remove(id);
@@ -120,7 +113,7 @@ export default function CandidateDetailPage() {
         {Array.from({ length: 4 }).map((_, i) => (
           <div
             key={i}
-            className="h-24 w-full animate-pulse rounded-lg bg-slate-100"
+            className="h-24 w-full animate-pulse rounded-2xl bg-white/[0.03]"
           />
         ))}
       </div>
@@ -153,132 +146,108 @@ export default function CandidateDetailPage() {
   const hasBeenVerified = candidate.verificationLogs.length > 0;
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <div className="mx-auto max-w-6xl space-y-6">
       <Link
         href="/candidates"
-        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900"
+        className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wider text-stardust transition hover:text-white"
       >
         <ArrowLeft size={14} />
         Back to candidates
       </Link>
 
-      {/* Header */}
-      <div className="card p-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-brand-50 text-brand-700">
-              <User size={28} />
+      {/* Hero header */}
+      <div className="card relative overflow-hidden p-6 sm:p-8">
+        <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#F7931A] opacity-10 blur-3xl" />
+
+        <div className="relative flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex gap-5">
+            <div className="relative shrink-0">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#EA580C] to-[#F7931A] text-white shadow-[0_0_25px_-5px_rgba(247,147,26,0.6)]">
+                <User size={28} strokeWidth={2.2} />
+              </div>
+              <span className="absolute -inset-1 rounded-2xl bg-[#F7931A] opacity-25 blur-md -z-10" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-slate-900">
+              <h1 className="font-heading text-3xl font-bold text-white">
                 {candidate.fullName}
               </h1>
-              <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-slate-500">
+              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[12px] text-stardust">
                 <span className="inline-flex items-center gap-1.5">
-                  <Mail size={14} /> {candidate.email}
+                  <Mail size={12} /> {candidate.email}
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <Phone size={14} /> {candidate.phone}
+                  <Phone size={12} /> {candidate.phone}
                 </span>
               </div>
-              <div className="mt-3">
+              <div className="mt-4">
                 <StatusBadge status={candidate.status} />
               </div>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <button
-              className="btn-primary"
-              onClick={handleVerify}
-              disabled={verifying}
-            >
+            <button className="btn-primary" onClick={handleVerify} disabled={verifying}>
               {verifying ? (
                 <>
-                  <Loader2 size={16} className="mr-1.5 animate-spin" />
-                  Verifying...
+                  <Loader2 size={16} className="animate-spin" />
+                  Verifying
                 </>
               ) : (
                 <>
-                  <PlayCircle size={16} className="mr-1.5" />
+                  <PlayCircle size={16} />
                   {hasBeenVerified ? "Re-run verification" : "Start verification"}
                 </>
               )}
             </button>
-            <button
-              className="btn-secondary"
-              onClick={handleDownload}
-              disabled={downloading}
-              title="Download PDF report"
-            >
+            <button className="btn-secondary" onClick={handleDownload} disabled={downloading}>
               {downloading ? (
                 <Loader2 size={16} className="animate-spin" />
               ) : (
                 <Download size={16} />
               )}
-              <span className="ml-1.5 hidden sm:inline">Report</span>
+              <span>Report</span>
             </button>
-            <Link
-              href={`/candidates/${candidate.id}/edit`}
-              className="btn-secondary"
-              title="Edit"
-            >
-              <Pencil size={16} />
+            <Link href={`/candidates/${candidate.id}/edit`} className="btn-secondary !px-3" title="Edit">
+              <Pencil size={14} />
             </Link>
-            <button
-              className="btn-danger"
-              onClick={handleDelete}
-              disabled={deleting}
-              title="Delete"
-            >
-              {deleting ? (
-                <Loader2 size={16} className="animate-spin" />
-              ) : (
-                <Trash2 size={16} />
-              )}
+            <button className="btn-danger !px-3" onClick={handleDelete} disabled={deleting} title="Delete">
+              {deleting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Cloud report link (only shown after a report has been generated) */}
+      {/* Cloud report link */}
       {candidate.reportUrl && (
-        <div className="card flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-brand-50 text-brand-700">
+        <div className="card-glass flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#F7931A]/15 text-[#F7931A] ring-1 ring-[#F7931A]/30">
               <Link2 size={18} />
             </div>
             <div className="min-w-0">
-              <div className="text-sm font-semibold text-slate-900">
+              <div className="font-heading text-sm font-semibold text-white">
                 Shareable cloud link
               </div>
-              <div className="truncate text-xs text-slate-500">
+              <div className="truncate font-mono text-[11px] text-stardust">
                 {candidate.reportUrl}
               </div>
               {candidate.reportGeneratedAt && (
-                <div className="text-[11px] text-slate-400">
+                <div className="mt-0.5 font-mono text-[10px] uppercase tracking-wider text-stardust/70">
                   Uploaded {formatDate(candidate.reportGeneratedAt)}
                 </div>
               )}
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            <button
-              className="btn-secondary !py-1.5 !px-3 text-xs"
-              onClick={handleCopyLink}
-            >
-              {copied ? (
-                <Check size={14} className="mr-1" />
-              ) : (
-                <Copy size={14} className="mr-1" />
-              )}
+            <button className="btn-secondary !px-3 !py-1.5 !text-[11px]" onClick={handleCopyLink}>
+              {copied ? <Check size={13} /> : <Copy size={13} />}
               {copied ? "Copied" : "Copy"}
             </button>
             <a
               href={candidate.reportUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-secondary !py-1.5 !px-3 text-xs"
+              className="btn-secondary !px-3 !py-1.5 !text-[11px]"
             >
               Open
             </a>
@@ -289,80 +258,43 @@ export default function CandidateDetailPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Personal details */}
         <div className="card lg:col-span-2">
-          <div className="border-b border-slate-200 px-6 py-4">
-            <h2 className="text-sm font-semibold text-slate-900">
-              Personal details
-            </h2>
+          <div className="border-b border-white/[0.06] px-6 py-4">
+            <div className="eyebrow">CANDIDATE INFORMATION</div>
           </div>
           <dl className="grid grid-cols-1 gap-6 p-6 sm:grid-cols-2">
-            <Field
-              icon={<User size={14} />}
-              label="Full name"
-              value={candidate.fullName}
-            />
-            <Field
-              icon={<Calendar size={14} />}
-              label="Date of birth"
-              value={formatDob(candidate.dob)}
-            />
-            <Field
-              icon={<Mail size={14} />}
-              label="Email"
-              value={candidate.email}
-            />
-            <Field
-              icon={<Phone size={14} />}
-              label="Phone"
-              value={candidate.phone}
-            />
-            <Field
-              icon={<ShieldCheck size={14} />}
-              label="Aadhaar"
-              value={candidate.aadhaarMasked}
-              mono
-            />
-            <Field
-              icon={<CreditCard size={14} />}
-              label="PAN"
-              value={candidate.panMasked}
-              mono
-            />
-            <Field
-              icon={<MapPin size={14} />}
-              label="Address"
-              value={candidate.address}
-              fullWidth
-            />
+            <Field icon={<User size={12} />} label="Full name" value={candidate.fullName} />
+            <Field icon={<Calendar size={12} />} label="Date of birth" value={formatDob(candidate.dob)} />
+            <Field icon={<Mail size={12} />} label="Email" value={candidate.email} />
+            <Field icon={<Phone size={12} />} label="Phone" value={candidate.phone} mono />
+            <Field icon={<ShieldCheck size={12} />} label="Aadhaar" value={candidate.aadhaarMasked} mono />
+            <Field icon={<CreditCard size={12} />} label="PAN" value={candidate.panMasked} mono />
+            <Field icon={<MapPin size={12} />} label="Address" value={candidate.address} fullWidth />
           </dl>
         </div>
 
-        {/* Verification cards */}
+        {/* Verification checks */}
         <div className="card">
-          <div className="border-b border-slate-200 px-6 py-4">
-            <h2 className="text-sm font-semibold text-slate-900">
-              Verification checks
-            </h2>
+          <div className="border-b border-white/[0.06] px-6 py-4">
+            <div className="eyebrow">VERIFICATION CHECKS</div>
           </div>
-          <div className="space-y-3 p-6">
+          <div className="space-y-3 p-5">
             <CheckCard
               icon={<ShieldCheck size={16} />}
               title="Aadhaar"
               status={aadhaarLog?.verificationStatus ?? "NOT_RUN"}
               message={
-                (aadhaarLog?.responsePayload as { message?: string } | null)
-                  ?.message ?? "Not yet run"
+                (aadhaarLog?.responsePayload as { message?: string } | null)?.message ??
+                "Not yet run"
               }
-              verifiedAt={
-                aadhaarLog ? formatDate(aadhaarLog.verifiedAt) : null
-              }
+              verifiedAt={aadhaarLog ? formatDate(aadhaarLog.verifiedAt) : null}
             />
             <CheckCard
               icon={<CreditCard size={16} />}
               title="PAN"
               status={panLog?.verificationStatus ?? "NOT_RUN"}
               message={
-                (panLog?.responsePayload as { message?: string } | null)
-                  ?.message ?? "Not yet run"
+                (panLog?.responsePayload as { message?: string } | null)?.message ??
+                "Not yet run"
               }
               verifiedAt={panLog ? formatDate(panLog.verifiedAt) : null}
             />
@@ -370,34 +302,32 @@ export default function CandidateDetailPage() {
         </div>
       </div>
 
-      {/* Verification timeline */}
+      {/* Timeline */}
       <div className="card">
-        <div className="border-b border-slate-200 px-6 py-4">
-          <h2 className="text-sm font-semibold text-slate-900">
-            Verification timeline
-          </h2>
+        <div className="border-b border-white/[0.06] px-6 py-4">
+          <div className="eyebrow">VERIFICATION TIMELINE</div>
         </div>
         {candidate.verificationLogs.length === 0 ? (
           <div className="p-8 text-center">
-            <Clock className="mx-auto h-8 w-8 text-slate-300" />
-            <p className="mt-2 text-sm font-medium text-slate-900">
+            <Clock className="mx-auto h-8 w-8 text-stardust/40" />
+            <p className="mt-2 font-heading text-sm font-medium text-white">
               No verifications yet
             </p>
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-stardust">
               Click &quot;Start verification&quot; above to run Aadhaar &amp; PAN checks.
             </p>
           </div>
         ) : (
-          <ul className="divide-y divide-slate-200">
+          <ul className="divide-y divide-white/[0.05]">
             {candidate.verificationLogs.map((log) => {
               const success = log.verificationStatus === "VERIFIED";
               return (
                 <li key={log.id} className="flex items-start gap-4 px-6 py-4">
                   <div
-                    className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${
+                    className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ring-1 ring-inset ${
                       success
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
+                        ? "bg-emerald-500/15 text-emerald-300 ring-emerald-400/30"
+                        : "bg-red-500/15 text-red-300 ring-red-400/30"
                     }`}
                   >
                     {log.verificationType === "AADHAAR" ? (
@@ -406,21 +336,21 @@ export default function CandidateDetailPage() {
                       <CreditCard size={14} />
                     )}
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-sm font-semibold text-slate-900">
+                      <span className="font-heading text-sm font-semibold text-white">
                         {log.verificationType === "AADHAAR" ? "Aadhaar" : "PAN"} verification
                       </span>
                       <StatusBadge status={log.verificationStatus} size="sm" />
                     </div>
-                    <div className="mt-1 text-xs text-slate-500">
+                    <div className="mt-0.5 font-mono text-[10px] uppercase tracking-wider text-stardust">
                       {formatDate(log.verifiedAt)}
                     </div>
                     <details className="mt-2">
-                      <summary className="cursor-pointer text-xs text-brand-600 hover:text-brand-700">
+                      <summary className="cursor-pointer font-mono text-[11px] uppercase tracking-wider text-[#F7931A] transition hover:text-[#FFD600]">
                         Show API response
                       </summary>
-                      <pre className="mt-2 overflow-x-auto rounded-md bg-slate-50 p-3 text-[11px] text-slate-700">
+                      <pre className="mt-2 overflow-x-auto rounded-lg border border-white/[0.05] bg-black/40 p-3 font-mono text-[11px] leading-relaxed text-stardust">
                         {JSON.stringify(log.responsePayload, null, 2)}
                       </pre>
                     </details>
@@ -434,8 +364,6 @@ export default function CandidateDetailPage() {
     </div>
   );
 }
-
-// ----- Sub-components -----
 
 function Field({
   icon,
@@ -452,13 +380,11 @@ function Field({
 }) {
   return (
     <div className={fullWidth ? "sm:col-span-2" : ""}>
-      <dt className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">
-        <span className="text-slate-400">{icon}</span>
+      <dt className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.15em] text-stardust">
+        <span className="text-stardust/60">{icon}</span>
         {label}
       </dt>
-      <dd
-        className={`mt-1 text-sm text-slate-900 ${mono ? "font-mono" : ""}`}
-      >
+      <dd className={`mt-1.5 text-sm text-white ${mono ? "font-mono" : ""}`}>
         {value}
       </dd>
     </div>
@@ -479,17 +405,19 @@ function CheckCard({
   verifiedAt: string | null;
 }) {
   return (
-    <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
+    <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3.5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-slate-500">{icon}</span>
-          <span className="text-sm font-medium text-slate-900">{title}</span>
+          <span className="text-stardust">{icon}</span>
+          <span className="font-heading text-sm font-semibold text-white">{title}</span>
         </div>
         <StatusBadge status={status} size="sm" />
       </div>
-      <p className="mt-1.5 text-xs text-slate-600">{message}</p>
+      <p className="mt-2 text-xs text-stardust">{message}</p>
       {verifiedAt && (
-        <p className="mt-1 text-[10px] text-slate-400">{verifiedAt}</p>
+        <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-stardust/60">
+          {verifiedAt}
+        </p>
       )}
     </div>
   );

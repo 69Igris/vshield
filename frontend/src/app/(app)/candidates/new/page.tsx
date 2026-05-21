@@ -29,23 +29,26 @@ export default function NewCandidatePage() {
   };
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-3xl space-y-5">
       <Link
         href="/candidates"
-        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900"
+        className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wider text-stardust transition hover:text-white"
       >
         <ArrowLeft size={14} />
         Back to candidates
       </Link>
 
-      <div className="mt-4">
-        <h1 className="text-2xl font-bold text-slate-900">Add candidate</h1>
-        <p className="mt-1 text-sm text-slate-500">
+      <div>
+        <div className="eyebrow">NEW CANDIDATE</div>
+        <h1 className="mt-3 font-heading text-3xl font-bold text-white">
+          Add a <span className="text-gradient">candidate</span>
+        </h1>
+        <p className="mt-2 text-sm text-stardust">
           Enter candidate details to begin the verification process.
         </p>
       </div>
 
-      <div className="card mt-6 p-6">
+      <div className="card p-6 sm:p-8">
         <CandidateForm onSubmit={handleSubmit} submitting={submitting} />
       </div>
     </div>

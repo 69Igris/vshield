@@ -81,29 +81,32 @@ export default function EditCandidatePage() {
   };
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-3xl space-y-5">
       <Link
         href={`/candidates/${id}`}
-        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900"
+        className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wider text-stardust transition hover:text-white"
       >
         <ArrowLeft size={14} />
         Back to candidate
       </Link>
 
-      <div className="mt-4">
-        <h1 className="text-2xl font-bold text-slate-900">Edit candidate</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Leave Aadhaar/PAN blank to keep the existing values.
+      <div>
+        <div className="eyebrow">EDIT CANDIDATE</div>
+        <h1 className="mt-3 font-heading text-3xl font-bold text-white">
+          Update <span className="text-gradient">details</span>
+        </h1>
+        <p className="mt-2 text-sm text-stardust">
+          Leave Aadhaar / PAN blank to keep the existing values.
         </p>
       </div>
 
-      <div className="card mt-6 p-6">
+      <div className="card p-6 sm:p-8">
         {loading ? (
           <div className="space-y-4">
             {Array.from({ length: 4 }).map((_, i) => (
               <div
                 key={i}
-                className="h-10 w-full animate-pulse rounded bg-slate-100"
+                className="h-10 w-full animate-pulse rounded bg-white/[0.03]"
               />
             ))}
           </div>

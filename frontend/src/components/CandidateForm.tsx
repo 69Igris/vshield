@@ -103,7 +103,7 @@ export default function CandidateForm({
             {...register("fullName")}
           />
           {errors.fullName && (
-            <p className="mt-1 text-xs text-red-600">{errors.fullName.message}</p>
+            <p className="mt-1.5 text-xs text-red-400">{errors.fullName.message}</p>
           )}
         </div>
 
@@ -118,7 +118,7 @@ export default function CandidateForm({
             {...register("dob")}
           />
           {errors.dob && (
-            <p className="mt-1 text-xs text-red-600">{errors.dob.message}</p>
+            <p className="mt-1 text-xs text-red-400">{errors.dob.message}</p>
           )}
         </div>
 
@@ -134,7 +134,7 @@ export default function CandidateForm({
             {...register("email")}
           />
           {errors.email && (
-            <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>
+            <p className="mt-1 text-xs text-red-400">{errors.email.message}</p>
           )}
         </div>
 
@@ -149,7 +149,7 @@ export default function CandidateForm({
             {...register("phone")}
           />
           {errors.phone && (
-            <p className="mt-1 text-xs text-red-600">{errors.phone.message}</p>
+            <p className="mt-1 text-xs text-red-400">{errors.phone.message}</p>
           )}
         </div>
 
@@ -165,12 +165,12 @@ export default function CandidateForm({
             {...register("aadhaarNumber")}
           />
           {errors.aadhaarNumber && (
-            <p className="mt-1 text-xs text-red-600">
+            <p className="mt-1 text-xs text-red-400">
               {errors.aadhaarNumber.message}
             </p>
           )}
-          <p className="mt-1 text-[11px] text-slate-500">
-            Stored securely. Will be masked in all reports.
+          <p className="mt-1.5 font-mono text-[10px] uppercase tracking-wider text-stardust/70">
+            Stored securely · masked in all reports
           </p>
         </div>
 
@@ -186,7 +186,7 @@ export default function CandidateForm({
             {...register("panNumber")}
           />
           {errors.panNumber && (
-            <p className="mt-1 text-xs text-red-600">
+            <p className="mt-1 text-xs text-red-400">
               {errors.panNumber.message}
             </p>
           )}
@@ -205,11 +205,11 @@ export default function CandidateForm({
           {...register("address")}
         />
         {errors.address && (
-          <p className="mt-1 text-xs text-red-600">{errors.address.message}</p>
+          <p className="mt-1 text-xs text-red-400">{errors.address.message}</p>
         )}
       </div>
 
-      <div className="flex items-center justify-end gap-3 border-t border-slate-200 pt-5">
+      <div className="flex items-center justify-end gap-3 border-t border-white/[0.06] pt-5">
         <button type="submit" className="btn-primary" disabled={submitting}>
           {submitting ? (
             <>

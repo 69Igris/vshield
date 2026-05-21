@@ -20,8 +20,10 @@ export default function RootPage() {
   }, [isHydrated, token, router]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="text-sm text-slate-500">Loading...</div>
+    <div className="flex min-h-screen items-center justify-center bg-void">
+      <div className="font-mono text-xs uppercase tracking-[0.3em] text-stardust">
+        Initializing...
+      </div>
     </div>
   );
 }

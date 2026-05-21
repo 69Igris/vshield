@@ -21,7 +21,7 @@ export default function DailyActivityChart({ data }: Props) {
   return (
     <div className="h-64">
       {allZero ? (
-        <div className="flex h-full items-center justify-center text-sm text-slate-400">
+        <div className="flex h-full items-center justify-center font-mono text-xs uppercase tracking-widest text-stardust/60">
           No activity in the last 7 days
         </div>
       ) : (
@@ -31,46 +31,54 @@ export default function DailyActivityChart({ data }: Props) {
             margin={{ top: 10, right: 12, bottom: 0, left: -20 }}
           >
             <defs>
-              <linearGradient id="brandFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#2563eb" stopOpacity={0.35} />
-                <stop offset="100%" stopColor="#2563eb" stopOpacity={0} />
+              <linearGradient id="btcFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#F7931A" stopOpacity={0.55} />
+                <stop offset="60%" stopColor="#F7931A" stopOpacity={0.15} />
+                <stop offset="100%" stopColor="#F7931A" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="rgba(255,255,255,0.06)"
+              vertical={false}
+            />
             <XAxis
               dataKey="label"
-              stroke="#94a3b8"
+              stroke="#64748B"
               fontSize={11}
               tickLine={false}
               axisLine={false}
+              style={{ fontFamily: "var(--font-mono)" }}
             />
             <YAxis
-              stroke="#94a3b8"
+              stroke="#64748B"
               fontSize={11}
               tickLine={false}
               axisLine={false}
               allowDecimals={false}
+              style={{ fontFamily: "var(--font-mono)" }}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: "#0f172a",
-                border: "none",
-                borderRadius: 6,
+                backgroundColor: "#0F1115",
+                border: "1px solid rgba(255,255,255,0.08)",
+                borderRadius: 10,
                 fontSize: 12,
                 color: "white",
+                fontFamily: "var(--font-mono)",
               }}
               itemStyle={{ color: "white" }}
-              labelStyle={{ color: "#94a3b8" }}
+              labelStyle={{ color: "#94A3B8" }}
               formatter={(v: number) => [`${v} candidate(s)`, "Created"]}
             />
             <Area
               type="monotone"
               dataKey="count"
-              stroke="#2563eb"
+              stroke="#F7931A"
               strokeWidth={2}
-              fill="url(#brandFill)"
-              dot={{ r: 3, fill: "#2563eb" }}
-              activeDot={{ r: 5 }}
+              fill="url(#btcFill)"
+              dot={{ r: 3, fill: "#F7931A", stroke: "#FFD600", strokeWidth: 1 }}
+              activeDot={{ r: 6, fill: "#FFD600", stroke: "#F7931A", strokeWidth: 2 }}
             />
           </AreaChart>
         </ResponsiveContainer>
