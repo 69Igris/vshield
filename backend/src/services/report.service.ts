@@ -62,43 +62,39 @@ interface ReportInputs {
   candidateId: string;
 }
 
+// Shape consumed by the pure PDF builder. Decoupled from the DB so the
+// same template can be used in scripts / tests / sample generators.
+export interface ReportData {
+  reportId: string;
+  generatedAt: Date;
+  overallStatus: "VERIFIED" | "FAILED" | "PARTIAL" | "PENDING";
+  candidate: {
+    fullName: string;
+    email: string;
+    phone: string;
+    aadhaarMasked: string;
+    panMasked: string;
+    dob: Date;
+    address: string;
+  };
+  aadhaar: {
+    status: "VERIFIED" | "FAILED" | "NOT_RUN";
+    message: string;
+    verifiedAt: Date | null;
+  };
+  pan: {
+    status: "VERIFIED" | "FAILED" | "NOT_RUN";
+    message: string;
+    verifiedAt: Date | null;
+  };
+  verifiedBy: { name: string; email: string };
+}
+
 /**
- * Fetch a candidate (owned by the user) + its latest verification logs
- * and return a PDF buffer. Uses PDFKit (pure JS, no Chromium needed).
+ * Pure PDF builder — takes ReportData, returns a Buffer. No DB, no I/O.
+ * Used by both the live API and the sample-report generation script.
  */
-export const generateReport = async (
-  inputs: ReportInputs
-): Promise<{ buffer: Buffer; fileName: string }> => {
-  const { userId, userName, userEmail, candidateId } = inputs;
-
-  const candidate = await prisma.candidate.findFirst({
-    where: { id: candidateId, createdById: userId },
-    include: { verificationLogs: { orderBy: { verifiedAt: "desc" } } },
-  });
-  if (!candidate) throw new AppError("Candidate not found", 404);
-
-  const latestAadhaar = candidate.verificationLogs.find(
-    (l) => l.verificationType === "AADHAAR"
-  );
-  const latestPan = candidate.verificationLogs.find(
-    (l) => l.verificationType === "PAN"
-  );
-
-  const aadhaarStatus = latestAadhaar?.verificationStatus ?? "NOT_RUN";
-  const panStatus = latestPan?.verificationStatus ?? "NOT_RUN";
-  const aadhaarMessage =
-    (latestAadhaar?.responsePayload as { message?: string } | null)?.message ??
-    "Verification has not been run yet.";
-  const panMessage =
-    (latestPan?.responsePayload as { message?: string } | null)?.message ??
-    "Verification has not been run yet.";
-
-  const reportId = candidate.id.slice(-12).toUpperCase();
-  const generatedAt = formatDate(new Date());
-
-  // =====================================================
-  // Build PDF
-  // =====================================================
+export const buildReportPdf = async (data: ReportData): Promise<Buffer> => {
   const doc = new PDFDocument({ size: "A4", margin: 50 });
   const chunks: Buffer[] = [];
 
@@ -119,11 +115,11 @@ export const generateReport = async (
 
   // Right-side meta
   doc.fontSize(9).fillColor(COLORS.muted);
-  doc.text(`Report ID: ${reportId}`, leftX, 50, {
+  doc.text(`Report ID: ${data.reportId}`, leftX, 50, {
     width: pageWidth,
     align: "right",
   });
-  doc.text(`Generated: ${generatedAt}`, leftX, 64, {
+  doc.text(`Generated: ${formatDate(data.generatedAt)}`, leftX, 64, {
     width: pageWidth,
     align: "right",
   });
@@ -149,11 +145,11 @@ export const generateReport = async (
     characterSpacing: 1.5,
   });
   doc.fillColor("#ffffff").font("Helvetica-Bold").fontSize(20);
-  doc.text(candidate.status, leftX + 18, bannerY + 28);
+  doc.text(data.overallStatus, leftX + 18, bannerY + 28);
 
   // status pill on right side of banner
-  const pillColor = statusColor(candidate.status);
-  const pillText = candidate.status;
+  const pillColor = statusColor(data.overallStatus);
+  const pillText = data.overallStatus;
   const pillTextWidth = doc.widthOfString(pillText);
   const pillWidth = pillTextWidth + 24;
   const pillX = leftX + pageWidth - pillWidth - 18;
@@ -176,33 +172,19 @@ export const generateReport = async (
   const col2X = leftX + pageWidth / 2 + 10;
   const colWidth = pageWidth / 2 - 20;
 
-  drawField(doc, "Full Name", candidate.fullName, col1X, y, colWidth);
-  drawField(doc, "Date of Birth", formatDob(candidate.dob), col2X, y, colWidth);
+  drawField(doc, "Full Name", data.candidate.fullName, col1X, y, colWidth);
+  drawField(doc, "Date of Birth", formatDob(data.candidate.dob), col2X, y, colWidth);
   y += 38;
 
-  drawField(doc, "Email", candidate.email, col1X, y, colWidth);
-  drawField(doc, "Phone", candidate.phone, col2X, y, colWidth);
+  drawField(doc, "Email", data.candidate.email, col1X, y, colWidth);
+  drawField(doc, "Phone", data.candidate.phone, col2X, y, colWidth);
   y += 38;
 
-  drawField(
-    doc,
-    "Aadhaar Number",
-    maskAadhaar(candidate.aadhaarNumber),
-    col1X,
-    y,
-    colWidth
-  );
-  drawField(
-    doc,
-    "PAN Number",
-    maskPan(candidate.panNumber),
-    col2X,
-    y,
-    colWidth
-  );
+  drawField(doc, "Aadhaar Number", data.candidate.aadhaarMasked, col1X, y, colWidth);
+  drawField(doc, "PAN Number", data.candidate.panMasked, col2X, y, colWidth);
   y += 38;
 
-  drawField(doc, "Address", candidate.address, col1X, y, pageWidth);
+  drawField(doc, "Address", data.candidate.address, col1X, y, pageWidth);
   y += 50;
 
   // ----- Verification Checks -----
@@ -211,9 +193,9 @@ export const generateReport = async (
   y = drawCheckCard(
     doc,
     "Aadhaar Verification",
-    aadhaarStatus,
-    aadhaarMessage,
-    latestAadhaar ? formatDate(latestAadhaar.verifiedAt) : null,
+    data.aadhaar.status,
+    data.aadhaar.message,
+    data.aadhaar.verifiedAt ? formatDate(data.aadhaar.verifiedAt) : null,
     leftX,
     y,
     pageWidth
@@ -222,9 +204,9 @@ export const generateReport = async (
   y = drawCheckCard(
     doc,
     "PAN Verification",
-    panStatus,
-    panMessage,
-    latestPan ? formatDate(latestPan.verifiedAt) : null,
+    data.pan.status,
+    data.pan.message,
+    data.pan.verifiedAt ? formatDate(data.pan.verifiedAt) : null,
     leftX,
     y,
     pageWidth
@@ -247,9 +229,9 @@ export const generateReport = async (
     .strokeColor(COLORS.ink)
     .stroke();
   doc.font("Helvetica-Bold").fontSize(10).fillColor(COLORS.ink);
-  doc.text(userName, leftX, footerY + 50);
+  doc.text(data.verifiedBy.name, leftX, footerY + 50);
   doc.font("Helvetica").fontSize(9).fillColor(COLORS.muted);
-  doc.text(userEmail, leftX, footerY + 64);
+  doc.text(data.verifiedBy.email, leftX, footerY + 64);
   doc.fillColor("#94a3b8").fontSize(8);
   doc.text("Authorized Verifier", leftX, footerY + 76);
 
@@ -264,7 +246,70 @@ export const generateReport = async (
   );
 
   doc.end();
-  const buffer = await bufferPromise;
+  return bufferPromise;
+};
+
+/**
+ * Fetch a candidate (owned by the user) + verification logs, build the PDF,
+ * fire-and-forget upload to Cloudinary, and return the buffer.
+ */
+export const generateReport = async (
+  inputs: ReportInputs
+): Promise<{ buffer: Buffer; fileName: string }> => {
+  const { userId, userName, userEmail, candidateId } = inputs;
+
+  const candidate = await prisma.candidate.findFirst({
+    where: { id: candidateId, createdById: userId },
+    include: { verificationLogs: { orderBy: { verifiedAt: "desc" } } },
+  });
+  if (!candidate) throw new AppError("Candidate not found", 404);
+
+  const latestAadhaar = candidate.verificationLogs.find(
+    (l) => l.verificationType === "AADHAAR"
+  );
+  const latestPan = candidate.verificationLogs.find(
+    (l) => l.verificationType === "PAN"
+  );
+
+  const data: ReportData = {
+    reportId: candidate.id.slice(-12).toUpperCase(),
+    generatedAt: new Date(),
+    overallStatus: candidate.status as ReportData["overallStatus"],
+    candidate: {
+      fullName: candidate.fullName,
+      email: candidate.email,
+      phone: candidate.phone,
+      aadhaarMasked: maskAadhaar(candidate.aadhaarNumber),
+      panMasked: maskPan(candidate.panNumber),
+      dob: candidate.dob,
+      address: candidate.address,
+    },
+    aadhaar: {
+      status:
+        (latestAadhaar?.verificationStatus as
+          | "VERIFIED"
+          | "FAILED"
+          | undefined) ?? "NOT_RUN",
+      message:
+        (latestAadhaar?.responsePayload as { message?: string } | null)
+          ?.message ?? "Verification has not been run yet.",
+      verifiedAt: latestAadhaar?.verifiedAt ?? null,
+    },
+    pan: {
+      status:
+        (latestPan?.verificationStatus as
+          | "VERIFIED"
+          | "FAILED"
+          | undefined) ?? "NOT_RUN",
+      message:
+        (latestPan?.responsePayload as { message?: string } | null)?.message ??
+        "Verification has not been run yet.",
+      verifiedAt: latestPan?.verifiedAt ?? null,
+    },
+    verifiedBy: { name: userName, email: userEmail },
+  };
+
+  const buffer = await buildReportPdf(data);
 
   const safeName = candidate.fullName.replace(/[^a-z0-9]/gi, "_");
   const fileName = `BGV_Report_${safeName}_${candidate.id.slice(-6)}.pdf`;

@@ -1,0 +1,12 @@
+fullName,email,phone,aadhaarNumber,panNumber,dob,address
+Asha Verma,asha@example.com,9876543201,123456789012,ABCDE1234F,1992-04-15,"21 MG Road, Bengaluru"
+Rohan Mehta,rohan@example.com,9876543202,234567890123,BCDEF2345G,1988-11-02,"7 Marine Drive, Mumbai"
+Sneha Iyer,sneha@example.com,9876543203,345678901234,CDEFG3456H,1995-06-30,"45 Park Street, Kolkata"
+Vikram Singh,vikram@example.com,9876543204,456789012345,DEFGH4567I,1990-08-21,"12 Sector 17, Chandigarh"
+Priya Sharma,priya@example.com,9876543205,567890123456,EFGHI5678J,1993-02-14,"88 Anna Nagar, Chennai"
+Arjun Reddy,arjun@example.com,9876543206,678901234567,FGHIJ6789K,1991-09-09,"5 Banjara Hills, Hyderabad"
+Kavya Nair,kavya@example.com,9876543207,789012345678,GHIJK7890L,1994-12-25,"10 MG Road, Kochi"
+Aditya Joshi,aditya@example.com,9876543208,890123456789,HIJKL8901M,1989-03-18,"33 FC Road, Pune"
+Bad Phone Example,badphone@example.com,123,901234567890,IJKLM9012N,1990-01-01,"This row will fail — phone is too short"
+Bad Pan Example,badpan@example.com,9876543210,112233445566,INVALID123,1990-01-01,"This row will fail — PAN format wrong"
+Bad Aadhaar Example,badaadhaar@example.com,9876543211,1234,JKLMN0123O,1990-01-01,"This row will fail — Aadhaar not 12 digits"
