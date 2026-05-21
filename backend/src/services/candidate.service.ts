@@ -243,39 +243,46 @@ export const bulkCreateCandidates = async (
 
 // Analytics: last-7-days timeseries + verification (Aadhaar/PAN) success rate
 export const getCandidateAnalytics = async (userId: string) => {
-  // Build a YYYY-MM-DD key using LOCAL date components (avoids UTC drift
-  // that previously made bucket keys disagree with candidate keys in
-  // non-UTC timezones like IST).
-  const localDateKey = (d: Date): string => {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${y}-${m}-${day}`;
-  };
+  // Fixed application timezone. Render runs in UTC, local dev typically runs
+  // in IST — bucketing in a fixed TZ keeps the chart consistent everywhere.
+  const TZ = "Asia/Kolkata";
+
+  // YYYY-MM-DD in the app timezone (en-CA happens to format that way).
+  const tzDateKey = (d: Date): string =>
+    new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(d);
+
+  // Human label like "21 May" in the app timezone.
+  const tzDateLabel = (d: Date): string =>
+    new Intl.DateTimeFormat("en-IN", {
+      timeZone: TZ,
+      day: "2-digit",
+      month: "short",
+    }).format(d);
 
   // ----- Last 7 days of new candidates -----
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const sevenDaysAgo = new Date(today);
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6); // include today => 7 buckets
+  const now = new Date();
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  // Use an 8-day UTC window so the query never misses a candidate whose
+  // IST date falls inside the 7-day window but whose UTC timestamp is slightly older.
+  const eightDaysAgo = new Date(now.getTime() - 8 * DAY_MS);
 
   const recentCandidates = await prisma.candidate.findMany({
-    where: { createdById: userId, createdAt: { gte: sevenDaysAgo } },
+    where: { createdById: userId, createdAt: { gte: eightDaysAgo } },
     select: { createdAt: true },
   });
 
+  // Build 7 buckets going back from "today" in the app TZ.
   const buckets: { date: string; label: string; count: number }[] = [];
   for (let i = 6; i >= 0; i--) {
-    const d = new Date(today);
-    d.setDate(d.getDate() - i);
+    const d = new Date(now.getTime() - i * DAY_MS);
     buckets.push({
-      date: localDateKey(d),
-      label: d.toLocaleDateString("en-IN", { day: "2-digit", month: "short" }),
+      date: tzDateKey(d),
+      label: tzDateLabel(d),
       count: 0,
     });
   }
   for (const c of recentCandidates) {
-    const key = localDateKey(new Date(c.createdAt));
+    const key = tzDateKey(new Date(c.createdAt));
     const bucket = buckets.find((b) => b.date === key);
     if (bucket) bucket.count++;
   }
