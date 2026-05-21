@@ -1,0 +1,74 @@
+// Prisma schema for Background Verification Platform
+// Database: MongoDB (Atlas)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// =====================================================
+// User: app users (recruiters/admins) who log in
+// =====================================================
+model User {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  candidates Candidate[]
+
+  @@map("users")
+}
+
+// =====================================================
+// Candidate: the person being verified
+// =====================================================
+model Candidate {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  fullName       String
+  email          String
+  phone          String
+  aadhaarNumber  String
+  panNumber      String
+  dob            DateTime
+  address        String
+  status         String   @default("PENDING") // PENDING | VERIFIED | FAILED | PARTIAL
+
+  // Cloudinary-hosted report (populated after first download). Stale after
+  // each re-verification — fresh URL is generated on the next download.
+  reportUrl         String?
+  reportGeneratedAt DateTime?
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  createdById String @db.ObjectId
+  createdBy   User   @relation(fields: [createdById], references: [id])
+
+  verificationLogs VerificationLog[]
+
+  @@map("candidates")
+}
+
+// =====================================================
+// VerificationLog: audit trail of every verification call
+// =====================================================
+model VerificationLog {
+  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+  verificationType   String   // "AADHAAR" | "PAN"
+  requestPayload     Json
+  responsePayload    Json
+  verificationStatus String   // "VERIFIED" | "FAILED"
+  verifiedAt         DateTime @default(now())
+
+  candidateId String    @db.ObjectId
+  candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  @@map("verification_logs")
+}

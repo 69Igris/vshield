@@ -1,0 +1,271 @@
+{
+  "info": {
+    "name": "BGV — Background Verification Platform",
+    "description": "Postman collection for the BGV backend. Set the `baseUrl` and `token` collection variables (token is auto-set by the Login request).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "bgv-collection-001"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000", "type": "string" },
+    { "key": "token", "value": "", "type": "string" },
+    { "key": "candidateId", "value": "", "type": "string" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET / (root)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/", "host": ["{{baseUrl}}"], "path": [""] }
+          }
+        },
+        {
+          "name": "GET /api/health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/health", "host": ["{{baseUrl}}"], "path": ["api", "health"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Admin User\",\n  \"email\": \"admin@test.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data?.data?.token) {",
+                  "  pm.collectionVariables.set('token', data.data.token);",
+                  "  console.log('token saved to collection variable');",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@test.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data?.data?.token) {",
+                  "  pm.collectionVariables.set('token', data.data.token);",
+                  "  console.log('token saved');",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Me (current user)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/auth/me", "host": ["{{baseUrl}}"], "path": ["api", "auth", "me"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Candidates",
+      "item": [
+        {
+          "name": "List (with filters)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/candidates?page=1&limit=10&search=&status=",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "candidates"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "search", "value": "" },
+                { "key": "status", "value": "", "description": "PENDING | VERIFIED | FAILED | PARTIAL" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/candidates/stats", "host": ["{{baseUrl}}"], "path": ["api", "candidates", "stats"] }
+          }
+        },
+        {
+          "name": "Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/candidates/analytics", "host": ["{{baseUrl}}"], "path": ["api", "candidates", "analytics"] }
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"John Doe\",\n  \"email\": \"john@test.com\",\n  \"phone\": \"9876543210\",\n  \"aadhaarNumber\": \"123412341234\",\n  \"panNumber\": \"ABCDE1234F\",\n  \"dob\": \"1995-06-15\",\n  \"address\": \"42 Some Street, Bengaluru\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/candidates", "host": ["{{baseUrl}}"], "path": ["api", "candidates"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data?.data?.id) {",
+                  "  pm.collectionVariables.set('candidateId', data.data.id);",
+                  "  console.log('candidateId saved:', data.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Bulk create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"candidates\": [\n    {\n      \"fullName\": \"Asha Verma\",\n      \"email\": \"asha@example.com\",\n      \"phone\": \"9876543201\",\n      \"aadhaarNumber\": \"123456789012\",\n      \"panNumber\": \"ABCDE1234F\",\n      \"dob\": \"1992-04-15\",\n      \"address\": \"21 MG Road, Bengaluru\"\n    },\n    {\n      \"fullName\": \"Rohan Mehta\",\n      \"email\": \"rohan@example.com\",\n      \"phone\": \"9876543202\",\n      \"aadhaarNumber\": \"234567890123\",\n      \"panNumber\": \"BCDEF2345G\",\n      \"dob\": \"1988-11-02\",\n      \"address\": \"7 Marine Drive, Mumbai\"\n    }\n  ]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/candidates/bulk", "host": ["{{baseUrl}}"], "path": ["api", "candidates", "bulk"] }
+          }
+        },
+        {
+          "name": "Get by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/candidates/{{candidateId}}", "host": ["{{baseUrl}}"], "path": ["api", "candidates", "{{candidateId}}"] }
+          }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"9999999999\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/candidates/{{candidateId}}", "host": ["{{baseUrl}}"], "path": ["api", "candidates", "{{candidateId}}"] }
+          }
+        },
+        {
+          "name": "Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/candidates/{{candidateId}}", "host": ["{{baseUrl}}"], "path": ["api", "candidates", "{{candidateId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Verification",
+      "item": [
+        {
+          "name": "Start verification",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/verifications/{{candidateId}}/start", "host": ["{{baseUrl}}"], "path": ["api", "verifications", "{{candidateId}}", "start"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "Download PDF",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/reports/{{candidateId}}", "host": ["{{baseUrl}}"], "path": ["api", "reports", "{{candidateId}}"] }
+          },
+          "description": "Returns application/pdf with Content-Disposition: attachment. In Postman, click 'Save Response → Save to a file' to view."
+        }
+      ]
+    },
+    {
+      "name": "Mock provider APIs (public)",
+      "item": [
+        {
+          "name": "Mock Aadhaar verify",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "auth": { "type": "noauth" },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"aadhaarNumber\": \"123412341234\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/mock-api/aadhaar/verify", "host": ["{{baseUrl}}"], "path": ["mock-api", "aadhaar", "verify"] }
+          }
+        },
+        {
+          "name": "Mock PAN verify",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "auth": { "type": "noauth" },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"panNumber\": \"ABCDE1234F\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/mock-api/pan/verify", "host": ["{{baseUrl}}"], "path": ["mock-api", "pan", "verify"] }
+          }
+        }
+      ]
+    }
+  ]
+}
